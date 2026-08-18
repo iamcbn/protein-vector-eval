@@ -182,7 +182,6 @@ python 03_run_analysis.py
 
 **Bruno Chike Nwagbo**
 Master of Information Technology (MIT), Miva Open University
-Topic 26 — Vector Retrieval Optimization for Protein Embeddings
 
 ---
 

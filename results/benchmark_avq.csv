@@ -1,0 +1,2 @@
+Method,ANN Recall@10,Biological Accuracy@1,Avg Query Latency (ms),Latency Note
+AVQ (ScaNN),0.043,0.008,0.0599,"LATENCY_EXCLUDED: ScaNN throughput reflects engine engineering, not the AVQ quantisation algorithm. See Chapter 3 §3.7."

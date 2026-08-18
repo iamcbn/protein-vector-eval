@@ -1,0 +1,2 @@
+Method,Build Time (s),Index Size (GB),Note
+AVQ (ScaNN),1.6911,0.054773,ScaNN AVQ index; latency excluded from cross-method comparisons (see Chapter 3 §3.7 and methodology note)

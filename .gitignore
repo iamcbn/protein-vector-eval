@@ -2,11 +2,7 @@
 .venv
 .venv_wsl2
 
-# Large data files — generated/downloaded on the GPU instance, not pushed
-data/
-
-# Results — generated fresh on the GPU instance, not pushed
-results/
+data/raw_embeddings_10k.pt
 
 # Python cache
 __pycache__/

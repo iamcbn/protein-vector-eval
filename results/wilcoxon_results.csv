@@ -1,0 +1,7 @@
+Method,vs Baseline,Latency W-stat,Latency p-value,Latency Direction,Latency Sig (p<.05),Bio Acc W-stat,Bio Acc p-value,Bio Acc Direction,Bio Acc Sig (p<.05)
+PCA + FlatL2,Mean Pooling (FlatL2),1000.0,0.0,faster,YES,231.0,0.0,worse/same,YES
+Product Quantization (PQ),Mean Pooling (FlatL2),1000.0,0.0,faster,YES,294.0,0.0,worse/same,YES
+DCT Fingerprinting,Mean Pooling (FlatL2),0.0,0.0,faster,YES,3048.5,0.0,worse/same,YES
+TEA Alphabet,Mean Pooling (FlatL2),1000.0,0.0,faster,YES,284.5,0.0,worse/same,YES
+Knowledge Distillation (BiLSTM),Mean Pooling (FlatL2),1845.0,0.0,faster,YES,846.0,0.0,worse/same,YES
+AVQ (ScaNN),Mean Pooling (FlatL2),N/A,N/A,excluded,N/A - latency not cross-comparable (ScaNN vs FAISS),325.5,0.0,worse/same,YES

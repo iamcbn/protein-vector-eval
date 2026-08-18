@@ -1,5 +1,5 @@
 # ============================================================
-# requirements.txt — Protein Embedding Codebase (Linux / Vast.ai)
+# requirements.txt — Protein Embedding Codebase (Linux native)
 # ============================================================
 # Install with:
 #   pip install -r requirements.txt
@@ -9,7 +9,7 @@
 #   pip install -r requirements.txt
 #
 # faiss-gpu replaces faiss-cpu for GPU-accelerated index building.
-# scann is included here (Linux-native; no WSL2 needed on vast.ai).
+# scann is included here (Linux-native; no WSL2 needed).
 # ============================================================
 
 # --- Deep learning ---
@@ -18,8 +18,8 @@ torchvision
 transformers
 
 # --- Vector indexing ---
-faiss-gpu       # GPU-accelerated FAISS (replaces faiss-cpu)
-scann           # ScaNN AVQ — requires Linux (runs natively on vast.ai)
+faiss-gpu       
+scann           # ScaNN AVQ — requires Linux 
 
 # --- Numerical / scientific ---
 numpy

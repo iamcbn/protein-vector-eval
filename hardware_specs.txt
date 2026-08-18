@@ -1,0 +1,14 @@
+Hardware Specifications (vast.ai instance)
+==========================================
+
+GPU:
+- Model: NVIDIA GeForce RTX 4090
+- VRAM: 24 GB (24564 MiB)
+- CUDA Version: 13.0
+- Driver Version: 580.95.05
+
+CPU:
+- Model: AMD Ryzen 5 5600X 6-Core Processor
+
+System Memory (RAM):
+- Total: 62 GiB
