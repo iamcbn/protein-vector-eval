@@ -65,16 +65,15 @@ def run_online_inference():
         sys.exit(result.returncode)
 
 
-def run_wsl_script(script_name):
-    print(f"\n{'=' * 60}")
-    print(f"ACTION REQUIRED: WSL2 Execution")
+def run_avq_inference():
+    script = os.path.join(BASE_DIR, "src", "04b_online_inference_avq.py")
     print(f"{'=' * 60}")
-    print(f"The next step requires Linux (for ScaNN AVQ).")
-    print(f"Please open your WSL2 (Ubuntu) terminal and copy/paste these commands:")
-    print(f"\n    cd \"/mnt/c/Users/NEW USER/Desktop/Topic 26 - Vector Retrieval Optimization for Protein Embeddings/codebase\"")
-    print(f"    source .venv_wsl2/bin/activate")
-    print(f"    python3 src/{script_name}\n")
-    input("Press Enter once the script has successfully finished in WSL2 to continue...")
+    print("Running AVQ Online Inference (ScaNN)...")
+    print(f"{'=' * 60}\n")
+    result = subprocess.run([sys.executable, script])
+    if result.returncode != 0:
+        print(f"\n[ERROR] 04b_online_inference_avq.py failed (exit code {result.returncode}).")
+        sys.exit(result.returncode)
 
 
 def confirm_output():
@@ -93,7 +92,7 @@ def main():
     print("\n=== Protein Vector Retrieval — Online Evaluation Suite ===\n")
     check_prerequisites()
     run_online_inference()
-    run_wsl_script("04b_online_inference_avq.py")
+    run_avq_inference()
     confirm_output()
     print("\n=== Online Evaluation Completed Successfully! ===\n")
 
