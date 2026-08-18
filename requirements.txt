@@ -1,0 +1,37 @@
+# ============================================================
+# requirements.txt — Protein Embedding Codebase (Linux / Vast.ai)
+# ============================================================
+# Install with:
+#   pip install -r requirements.txt
+#
+# GPU build of PyTorch (CUDA 12.1):
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+#   pip install -r requirements.txt
+#
+# faiss-gpu replaces faiss-cpu for GPU-accelerated index building.
+# scann is included here (Linux-native; no WSL2 needed on vast.ai).
+# ============================================================
+
+# --- Deep learning ---
+torch
+torchvision
+transformers
+
+# --- Vector indexing ---
+faiss-gpu       # GPU-accelerated FAISS (replaces faiss-cpu)
+scann           # ScaNN AVQ — requires Linux (runs natively on vast.ai)
+
+# --- Numerical / scientific ---
+numpy
+scipy
+scikit-learn
+joblib
+
+# --- Data handling & analysis ---
+pandas
+
+# --- Visualisation ---
+matplotlib
+
+# --- Networking (data download in 01_prepare_data.py) ---
+requests

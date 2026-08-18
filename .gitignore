@@ -1,0 +1,20 @@
+# Virtual environments
+.venv
+.venv_wsl2
+
+# Large data files — generated/downloaded on the GPU instance, not pushed
+data/
+
+# Results — generated fresh on the GPU instance, not pushed
+results/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# OS files
+.DS_Store
+Thumbs.db
