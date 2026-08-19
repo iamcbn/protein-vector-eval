@@ -3,7 +3,7 @@
 .venv_wsl2
 
 data/raw_embeddings_10k.pt
-data//raw_embeddings_queries.pt
+data/raw_embeddings_queries.pt
 
 # Python cache
 __pycache__/
@@ -15,3 +15,7 @@ __pycache__/
 # OS files
 .DS_Store
 Thumbs.db
+
+/data
+/results
+

@@ -1,18 +1,26 @@
 """
-run_analysis.py — Statistical Analysis Entry Point
-====================================================
-Entry point for Phase 2 of the benchmarking pipeline.
+03_run_analysis.py — Statistical Analysis Entry Point
+======================================================
+Entry point for Phase 3 of the benchmarking pipeline.
 
-Checks all required result files exist, then runs
-05_statistical_analysis.py.
+Checks all required result files exist, then runs:
+  05_statistical_analysis.py  — Wilcoxon tests + figures
+  07_bootstrap_analysis.py    — Bootstrap CIs (cluster + case), McNemar
+                                paired tests, and density-bucket breakdown
+
+NOTE: Wilson/Wald closed-form CIs are NOT reported.  The queries are not
+independent Bernoulli trials because queries from the same SCOPe superfamily
+share structural context (intra-cluster correlation).  All CIs use the
+cluster bootstrap, which resamples by superfamily rather than by query.
 
 Usage:
-    python run_analysis.py
+    python 03_run_analysis.py
 
 Pipeline order (full run from scratch):
-    1. python offline_build.py   ← data prep + embeddings + indexing
-    2. python online_eval.py     ← online query evaluation (saves raw data)
-    3. python run_analysis.py    ← statistical tests + figures  ← YOU ARE HERE
+    1. python 01_offline_build.py   ← data prep + embeddings + indexing
+    2. python 00_sanity_checks.py   ← verify coverage + integrity (optional)
+    3. python 02_online_eval.py     ← online query evaluation
+    4. python 03_run_analysis.py    ← statistical tests + figures  ← YOU ARE HERE
 """
 
 import subprocess
@@ -62,12 +70,26 @@ def run_statistical_analysis():
         sys.exit(result.returncode)
 
 
+def run_bootstrap_analysis():
+    script = os.path.join(BASE_DIR, "src", "07_bootstrap_analysis.py")
+    print("=" * 60)
+    print("Running Bootstrap CI + McNemar + Density-Bucket Analysis...")
+    print("=" * 60 + "\n")
+    result = subprocess.run([sys.executable, script])
+    if result.returncode != 0:
+        print(f"\n[ERROR] 07_bootstrap_analysis.py failed (exit code {result.returncode}).")
+        sys.exit(result.returncode)
+
+
 def confirm_outputs():
     print("\nChecking generated outputs...")
     figures_dir = os.path.join(RESULTS_DIR, "figures")
     expected = [
         os.path.join(RESULTS_DIR,  "wilcoxon_results.csv"),
         os.path.join(RESULTS_DIR,  "full_results.csv"),
+        os.path.join(RESULTS_DIR,  "bootstrap_ci_report.txt"),
+        os.path.join(RESULTS_DIR,  "mcnemar_report.txt"),
+        os.path.join(RESULTS_DIR,  "density_bucket_report.txt"),
         os.path.join(figures_dir,  "pareto_speed_vs_accuracy.png"),
         os.path.join(figures_dir,  "tradeoff_ann_vs_compression.png"),
         os.path.join(figures_dir,  "tradeoff_bio_vs_compression.png"),
@@ -90,9 +112,11 @@ def main():
     print("\n=== Protein Vector Retrieval — Statistical Analysis Suite ===\n")
     check_prerequisites()
     run_statistical_analysis()
+    run_bootstrap_analysis()
     confirm_outputs()
     print("\n=== Analysis Pipeline Completed Successfully! ===\n")
 
 
 if __name__ == "__main__":
     main()
+

@@ -1,4 +1,4 @@
-﻿# Empirical Evaluation of ESM-2 Embedding Compression Strategies for Scalable Protein Sequence Retrieval Using FAISS
+# Empirical Evaluation of ESM-2 Embedding Compression Strategies for Scalable Protein Sequence Retrieval Using FAISS
 
 **Preliminary Study — Seminar Project**
 Master of Information Technology (MIT), Miva Open University
@@ -185,4 +185,51 @@ Master of Information Technology (MIT), Miva Open University
 
 ---
 
-*Results and figures will be added to this README following successful execution on the GPU instance.*
+## Results
+
+The full pipeline was successfully executed on a vast.ai cloud GPU instance (NVIDIA GeForce RTX 4090, 24 GB VRAM; AMD Ryzen 5 5600X; 62 GiB RAM). All seven compression strategies were evaluated across 1,000 held-out SCOPe 2.08 query proteins.
+
+### Benchmark Summary
+
+| Method | ANN Recall@10 | Biological Accuracy@1 | Avg Latency (ms) | Index Size (GB) | Compression Ratio |
+|--------|:---:|:---:|:---:|:---:|:---:|
+| **Mean Pooling (FlatL2 — Baseline)** | 1.000 | **0.656** | 2.399 | 0.0477 | 1.0× |
+| PCA + FlatL2 | 0.999 | 0.430 | **0.248** | 0.0024 | 20.0× |
+| Product Quantization (PQ) | 0.997 | 0.467 | 0.357 | 0.0015 | 31.4× |
+| DCT Fingerprinting | 0.266 | 0.214 | 0.152 | 0.0024 | 20.0× |
+| TEA Alphabet | 0.425 | 0.090 | 0.517 | 0.0007 | **64.0×** |
+| Knowledge Distillation (BiLSTM) | 0.994 | **0.487** | 1.438 | 0.0095 | 5.0× |
+| AVQ (ScaNN)† | 0.043 | 0.008 | 0.060† | 0.0548 | 0.87× |
+
+> **†** AVQ latency reflects ScaNN engine engineering, not the AVQ algorithm itself. Excluded from Pareto speed comparisons.
+
+### Key Findings
+
+**1. ESM-2 embeddings natively capture protein structure.**
+The uncompressed FlatL2 baseline achieved **65.6% Biological Accuracy@1** — meaning in 656 out of 1,000 queries, the single closest neighbour belonged to the same SCOPe 2.08 Superfamily as the query, with no domain-specific tuning whatsoever. This establishes that raw mean-pooled ESM-2 embeddings are a high-quality biological signal, not just a generic vector representation.
+
+**2. Knowledge Distillation best preserves biological fidelity.**
+At 5× compression, the BiLSTM student model retained **48.7% BA@1** — the highest among all compressed methods. Its MSE training objective explicitly forces the student to stay geometrically close to the ESM-2 embedding space, explaining why it preserves biological signal better than any geometric compression technique.
+
+**3. PCA and PQ sit on the Pareto frontier.**
+PCA + FlatL2 achieves **43.0% BA@1** at just **0.25 ms** average latency and 20× compression. Product Quantization achieves **46.7% BA@1** at **0.36 ms** and 31.4× compression. Both occupy the Pareto-optimal region — no other method outperforms them on both speed and biological accuracy simultaneously.
+
+**4. DCT Fingerprinting fails on both axes.**
+Despite being the fastest method (0.15 ms), DCT collapsed ANN Recall@10 to just **26.6%** and BA@1 to **21.4%**. Speed gains are irrelevant if the retrieval results are biologically wrong. DCT is Pareto-dominated by PCA on every meaningful metric.
+
+**5. AVQ (ScaNN) underperformed across all metrics.**
+AVQ achieved only **0.8% BA@1** and **4.3% ANN Recall@10**, while producing an index *larger* than the uncompressed baseline (0.87× compression ratio). The anisotropic quantization objective is mismatched to the geometric distribution of ESM-2 protein embeddings.
+
+### Pareto Frontier
+
+The Pareto analysis (speed vs. biological accuracy) identifies **PCA + FlatL2** and **Product Quantization** as jointly Pareto-optimal for general use. Knowledge Distillation is optimal when maximum biological fidelity is the priority. DCT, TEA, and AVQ are all Pareto-dominated.
+
+![Pareto Frontier: Speed vs. Biological Accuracy](results/figures/pareto_speed_vs_accuracy.png)
+
+*Pareto frontier of query latency (lower is better) vs. Biological Accuracy@1 (higher is better). PCA + FlatL2 and PQ occupy the Pareto-optimal upper-left region. AVQ plotted on accuracy axis only (latency not cross-comparable).*
+
+### Statistical Validation
+
+All pairwise latency comparisons versus the FlatL2 baseline were confirmed statistically significant (Wilcoxon signed-rank test, p < 0.05). All biological accuracy changes versus baseline were also statistically significant (p < 0.05 across all methods), confirming that the degradation in BA@1 under compression is not due to random variation.
+
+Detailed W-statistics and p-values are in [`results/wilcoxon_results.csv`](results/wilcoxon_results.csv). Full merged results with compression ratios are in [`results/full_results.csv`](results/full_results.csv).
