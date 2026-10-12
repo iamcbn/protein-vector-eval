@@ -1,1 +1,1 @@
-Total Index Build Time: 5.55 seconds
+Total Index Build Time: 350.15 seconds

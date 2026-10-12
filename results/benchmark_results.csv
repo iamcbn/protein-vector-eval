@@ -1,7 +1,7 @@
 Method,ANN Recall@10,Biological Accuracy@1,Avg Query Latency (ms)
-Mean Pooling (FlatL2),1.0,0.656,2.3992
-PCA + FlatL2,0.999,0.43,0.2476
-Product Quantization (PQ),0.997,0.467,0.3565
-DCT Fingerprinting,0.266,0.214,0.1521
-TEA Alphabet,0.425,0.09,0.5172
-Knowledge Distillation (BiLSTM),0.994,0.487,1.4378
+Mean Pooling (FlatL2),1.0,0.75,14.4668
+PCA + FlatL2,0.999,0.501,3.4874
+Product Quantization (PQ),1.0,0.54,6.9968
+DCT Fingerprinting,0.295,0.248,0.2731
+TEA Alphabet,0.447,0.119,0.7028
+Knowledge Distillation (BiLSTM),0.992,0.555,2.2052

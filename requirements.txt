@@ -35,3 +35,6 @@ matplotlib
 
 # --- Networking (data download in 01_prepare_data.py) ---
 requests
+
+# --- Statistical Analysis ---
+statsmodels

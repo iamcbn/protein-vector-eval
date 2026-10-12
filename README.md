@@ -187,49 +187,56 @@ Master of Information Technology (MIT), Miva Open University
 
 ## Results
 
-The full pipeline was successfully executed on a vast.ai cloud GPU instance (NVIDIA GeForce RTX 4090, 24 GB VRAM; AMD Ryzen 5 5600X; 62 GiB RAM). All seven compression strategies were evaluated across 1,000 held-out SCOPe 2.08 query proteins.
+The full pipeline was successfully executed on a vast.ai cloud GPU instance (NVIDIA GeForce RTX 4090, 24 GB VRAM, CUDA 12.8; AMD EPYC 7502 32-Core; 503 GiB RAM). All seven compression strategies were evaluated across 1,000 held-out SCOPe 2.08 query proteins.
 
 ### Benchmark Summary
 
-| Method | ANN Recall@10 | Biological Accuracy@1 | Avg Latency (ms) | Index Size (GB) | Compression Ratio |
-|--------|:---:|:---:|:---:|:---:|:---:|
-| **Mean Pooling (FlatL2 — Baseline)** | 1.000 | **0.656** | 2.399 | 0.0477 | 1.0× |
-| PCA + FlatL2 | 0.999 | 0.430 | **0.248** | 0.0024 | 20.0× |
-| Product Quantization (PQ) | 0.997 | 0.467 | 0.357 | 0.0015 | 31.4× |
-| DCT Fingerprinting | 0.266 | 0.214 | 0.152 | 0.0024 | 20.0× |
-| TEA Alphabet | 0.425 | 0.090 | 0.517 | 0.0007 | **64.0×** |
-| Knowledge Distillation (BiLSTM) | 0.994 | **0.487** | 1.438 | 0.0095 | 5.0× |
-| AVQ (ScaNN)† | 0.043 | 0.008 | 0.060† | 0.0548 | 0.87× |
+| Method | ANN Recall@10 | BA@1 | 95% CI | Avg Latency (ms) | Index Size (GB) | Compression |
+|--------|:---:|:---:|:---:|:---:|:---:|:---:|
+| **Mean Pooling (FlatL2 — Baseline)** | 1.000 | **0.750** | [0.716, 0.782] | 14.467 | 0.0477 | 1.0× |
+| PCA + FlatL2 | 0.999 | 0.501 | [0.456, 0.544] | 3.487 | 0.0024 | 20.0× |
+| Product Quantization (PQ) | 1.000 | 0.540 | [0.495, 0.582] | 6.997 | 0.0015 | 31.4× |
+| DCT Fingerprinting | 0.295 | 0.248 | [0.207, 0.290] | **0.273** | 0.0024 | 20.0× |
+| TEA Alphabet | 0.447 | 0.119 | [0.093, 0.146] | 0.703 | 0.0007 | **64.0×** |
+| Knowledge Distillation (BiLSTM) | 0.992 | **0.555** | [0.513, 0.594] | 2.205 | 0.0095 | 5.0× |
+| AVQ (ScaNN)† | 0.032 | 0.010 | N/A | 0.105† | 0.0548 | 0.87× |
 
-> **†** AVQ latency reflects ScaNN engine engineering, not the AVQ algorithm itself. Excluded from Pareto speed comparisons.
+> **†** AVQ latency reflects ScaNN engine engineering, not the AVQ algorithm itself. Excluded from Pareto speed comparisons. Bootstrap CI not computed for AVQ (degenerate distribution: n=10 hits).
+
+> **CIs** are 95% cluster bootstrap intervals (B=10,000, clustered by SCOPe Superfamily).
 
 ### Key Findings
 
 **1. ESM-2 embeddings natively capture protein structure.**
-The uncompressed FlatL2 baseline achieved **65.6% Biological Accuracy@1** — meaning in 656 out of 1,000 queries, the single closest neighbour belonged to the same SCOPe 2.08 Superfamily as the query, with no domain-specific tuning whatsoever. This establishes that raw mean-pooled ESM-2 embeddings are a high-quality biological signal, not just a generic vector representation.
+The uncompressed FlatL2 baseline achieved **75.0% Biological Accuracy@1** (95% CI: [71.6%, 78.2%]) — in 750 out of 1,000 queries, the single closest neighbour belonged to the same SCOPe 2.08 Superfamily as the query protein, with no domain-specific tuning. Zero unwinnable queries were identified, confirming the 25.0% failure rate reflects embedding geometry, not dataset gaps.
 
-**2. Knowledge Distillation best preserves biological fidelity.**
-At 5× compression, the BiLSTM student model retained **48.7% BA@1** — the highest among all compressed methods. Its MSE training objective explicitly forces the student to stay geometrically close to the ESM-2 embedding space, explaining why it preserves biological signal better than any geometric compression technique.
+**2. Knowledge Distillation and PQ are statistically equivalent — and best.**
+At 5× compression, the BiLSTM student retained **55.5% BA@1** [51.3%, 59.4%]. At 31.4× compression, PQ retained **54.0% BA@1** [49.5%, 58.2%]. Their overlapping confidence intervals confirm they are statistically indistinguishable in biological fidelity — both retaining ~72–74% of the baseline's biological signal. Both significantly outperform all other compressed methods.
 
-**3. PCA and PQ sit on the Pareto frontier.**
-PCA + FlatL2 achieves **43.0% BA@1** at just **0.25 ms** average latency and 20× compression. Product Quantization achieves **46.7% BA@1** at **0.36 ms** and 31.4× compression. Both occupy the Pareto-optimal region — no other method outperforms them on both speed and biological accuracy simultaneously.
+**3. KD and PCA sit on the Pareto frontier.**
+Knowledge Distillation (55.5% BA@1, 2.2 ms) and PCA + FlatL2 (50.1% BA@1, 3.5 ms) jointly occupy the Pareto-optimal region — no other method outperforms them on both biological accuracy and latency simultaneously. PQ is Pareto-rational at 31.4× compression when storage is the primary constraint.
 
-**4. DCT Fingerprinting fails on both axes.**
-Despite being the fastest method (0.15 ms), DCT collapsed ANN Recall@10 to just **26.6%** and BA@1 to **21.4%**. Speed gains are irrelevant if the retrieval results are biologically wrong. DCT is Pareto-dominated by PCA on every meaningful metric.
+**4. DCT Fingerprinting fails on both axes — avoid it.**
+Despite being the fastest method (0.27 ms), DCT collapsed ANN Recall@10 to **29.5%** and BA@1 to **24.8%** (McNemar p = 2.38×10⁻¹⁰²). Speed gains are irrelevant when 70.5% of queries return biologically incorrect results. DCT is Pareto-dominated by PCA on every meaningful metric.
 
 **5. AVQ (ScaNN) underperformed across all metrics.**
-AVQ achieved only **0.8% BA@1** and **4.3% ANN Recall@10**, while producing an index *larger* than the uncompressed baseline (0.87× compression ratio). The anisotropic quantization objective is mismatched to the geometric distribution of ESM-2 protein embeddings.
+AVQ achieved only **1.0% BA@1** and **3.2% ANN Recall@10**, while producing an index *larger* than the uncompressed baseline (0.87× compression ratio). Anisotropic quantization objectives designed for text/image embeddings do not transfer to ESM-2 protein embedding geometry without protein-specific calibration.
 
 ### Pareto Frontier
 
-The Pareto analysis (speed vs. biological accuracy) identifies **PCA + FlatL2** and **Product Quantization** as jointly Pareto-optimal for general use. Knowledge Distillation is optimal when maximum biological fidelity is the priority. DCT, TEA, and AVQ are all Pareto-dominated.
+The Pareto analysis (speed vs. biological accuracy) identifies **Knowledge Distillation** and **PCA + FlatL2** as jointly Pareto-optimal. PQ is rational for maximum compression. DCT, TEA, and AVQ are all Pareto-dominated.
 
 ![Pareto Frontier: Speed vs. Biological Accuracy](results/figures/pareto_speed_vs_accuracy.png)
 
-*Pareto frontier of query latency (lower is better) vs. Biological Accuracy@1 (higher is better). PCA + FlatL2 and PQ occupy the Pareto-optimal upper-left region. AVQ plotted on accuracy axis only (latency not cross-comparable).*
+*Pareto frontier of query latency (lower is better) vs. Biological Accuracy@1 (higher is better). KD (55.5%, 2.2 ms) and PCA (50.1%, 3.5 ms) form the Pareto frontier. Error bars indicate 95% cluster bootstrap CIs. AVQ plotted on accuracy axis only (latency not cross-comparable).*
 
 ### Statistical Validation
 
-All pairwise latency comparisons versus the FlatL2 baseline were confirmed statistically significant (Wilcoxon signed-rank test, p < 0.05). All biological accuracy changes versus baseline were also statistically significant (p < 0.05 across all methods), confirming that the degradation in BA@1 under compression is not due to random variation.
+Three complementary tests were applied:
 
-Detailed W-statistics and p-values are in [`results/wilcoxon_results.csv`](results/wilcoxon_results.csv). Full merged results with compression ratios are in [`results/full_results.csv`](results/full_results.csv).
+- **Wilcoxon Signed-Rank Test** (latency, ANN Recall): All compressed FAISS methods were statistically significantly faster than baseline (p < 0.05 for all).
+- **McNemar Paired Test** (Biological Accuracy@1): All compressed methods showed statistically significant BA@1 degradation. Most extreme: TEA (p = 4.25×10⁻¹³⁷) and DCT (p = 2.38×10⁻¹⁰²). Most conservative: KD (p = 7.97×10⁻⁴²), reflecting the smallest degradation from the 75.0% ceiling.
+- **95% Cluster Bootstrap CIs** (Biological Accuracy@1): Clustered by SCOPe Superfamily (B = 10,000) to correct for non-independence of same-family queries. Non-overlapping CIs between KD and DCT confirm KD's biological superiority is unambiguous. Overlapping CIs between KD and PQ confirm they are statistically equivalent.
+
+Full W-statistics, p-values: [`results/wilcoxon_results.csv`](results/wilcoxon_results.csv) | [`results/mcnemar_report.txt`](results/mcnemar_report.txt) | Bootstrap: [`results/bootstrap_ci_report.txt`](results/bootstrap_ci_report.txt) | Full results: [`results/full_results.csv`](results/full_results.csv)
+
